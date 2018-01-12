@@ -84,10 +84,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::play(int idx)
 {
-	VideoFile v = VideoLibrary::instance()->getVideo(idx);
-	m_player->play(v.filePath());
-	ui->playTable->setCurrentIndex(m_playlist->index(m_playlist->idToRow(v.rowId()), 0));
-	ui->statusBar->showMessage(v.filePath());
+	VideoFile* v = VideoLibrary::instance()->getVideo(idx);
+	m_player->play(v->filePath());
+	ui->playTable->setCurrentIndex(m_playlist->index(m_playlist->idToRow(v->rowId()), 0));
+	ui->statusBar->showMessage(v->filePath());
 }
 
 void MainWindow::changeEvent(QEvent *e)

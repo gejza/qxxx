@@ -13,6 +13,29 @@ struct Range {
 	qreal ratio(Pos pos) const;
 };
 
+class TimelineNavigator;
+
+class TimelineNavigator
+{
+public:
+	virtual ~TimelineNavigator() {}
+	virtual void paint(QPainter* painter) = 0;
+	virtual Pos seekForward(const Range& total, Pos pos) = 0;
+	virtual Pos seekBackward(const Range& total, Pos pos) = 0;
+};
+
+class TimeSeekNavigator : public TimelineNavigator
+{
+public:
+	TimeSeekNavigator();
+	~TimeSeekNavigator() Q_DECL_OVERRIDE;
+	void paint(QPainter* painter) Q_DECL_OVERRIDE {}
+	Pos seekForward(const Range& total, Pos pos) Q_DECL_OVERRIDE;
+	Pos seekBackward(const Range& total, Pos pos) Q_DECL_OVERRIDE;
+
+	Range finded;
+};
+
 class Timeline : public QWidget
 {
 	Q_OBJECT
@@ -53,6 +76,7 @@ protected:
 	//void mouseReleaseEvent(QMouseEvent *mouse_event) Q_DECL_OVERRIDE;
 	//bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
 private:
+	TimelineNavigator* m_nav = nullptr;
 	Pos m_pos = 0;
 	Range m_total;
 	Range m_find;

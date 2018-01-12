@@ -2,35 +2,17 @@
 
 #include <QFileInfo>
 #include <QJsonObject>
+#include <QDateTime>
 
-class VideoFile::Data : public QSharedData
-{
-public:
-	int rowId = -1;
-	QString path;
-	QFileInfo fi() const { return QFileInfo(path);}
-};
 
-VideoFile::VideoFile() : data(new VideoFile::Data)
+VideoFile::VideoFile()
 {
 
 }
 
-VideoFile::VideoFile(int rowId) : data(new VideoFile::Data)
+VideoFile::VideoFile(int rowId)
 {
-	data->rowId = rowId;
-}
-
-VideoFile::VideoFile(const VideoFile &rhs) : data(rhs.data)
-{
-
-}
-
-VideoFile &VideoFile::operator=(const VideoFile &rhs)
-{
-	if (this != &rhs)
-		data.operator=(rhs.data);
-	return *this;
+	m_rowId = rowId;
 }
 
 VideoFile::~VideoFile()
@@ -40,34 +22,51 @@ VideoFile::~VideoFile()
 
 int VideoFile::rowId() const
 {
-	return data->rowId;
+	return m_rowId;
 }
 
 QString VideoFile::filePath() const
 {
-	return data->path;
+	return m_path;
 }
 
 void VideoFile::setPath(const QString &path)
 {
-	data->path = path;
+	m_path = path;
+}
+
+QDateTime VideoFile::createdTime() const
+{
+	return fi().lastModified();
 }
 
 QString VideoFile::fileName() const
 {
-	return data->fi().fileName();
+	return fi().fileName();
 }
 
 QJsonObject VideoFile::toJson() const
 {
 	QJsonObject ret;
 	ret["path"] = filePath();
+	if (stars()) {
+		ret["stars"] = stars();
+	}
 	return ret;
 }
 
-VideoFile VideoFile::fromJson(const QJsonObject &obj, int rowId)
+QFileInfo VideoFile::fi() const
 {
-	VideoFile f(rowId);
-	f.setPath(obj.value("path").toString());
+	return QFileInfo(filePath());
+}
+
+VideoFile* VideoFile::fromJson(const QJsonObject &obj, int rowId)
+{
+	VideoFile *f = new VideoFile(rowId);
+	f->setPath(obj.value("path").toString());
+	QJsonValue jsv = obj.value("stars");
+	if (!jsv.isUndefined()) {
+		f->m_stars = jsv.toInt();
+	}
 	return f;
 }

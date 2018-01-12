@@ -1,6 +1,7 @@
 #include "playlistmodel.h"
 #include "videolibrary.h"
 
+#include <QDateTime>
 #include <QDir>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -44,7 +45,7 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const
 	return ColCount;
 }
 
-VideoFile PlaylistModel::at(const QModelIndex &idx) const
+VideoFile* PlaylistModel::at(const QModelIndex &idx) const
 {
 	return VideoLibrary::instance()->getVideo(rowToId(idx.row()));
 }
@@ -73,7 +74,7 @@ void PlaylistModel::checkIndex()
 		}
 
 		std::sort(m_p.begin(), m_p.end(), [](int a, int b){
-			return VideoLibrary::instance()->getVideo(a).fileName() < VideoLibrary::instance()->getVideo(b).fileName();
+			return VideoLibrary::instance()->getVideo(a)->fileName() < VideoLibrary::instance()->getVideo(b)->fileName();
 		});
 		endResetModel();
 	}
@@ -86,7 +87,13 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 
 	switch (role) {
 	case Qt::EditRole:
-		return at(index).fileName();
+		switch (index.column()) {
+		case ColName:
+			return at(index)->fileName();
+		case ColCreated:
+			return at(index)->createdTime().toString();
+		};
+		break;
 	case Qt::DisplayRole:
 		return data(index, Qt::EditRole);
 	}

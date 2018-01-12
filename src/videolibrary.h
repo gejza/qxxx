@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QObject>
+#include <QVector>
 #include "videofile.h"
 
 class VideoLibrary : public QObject
@@ -13,7 +14,7 @@ public:
 	explicit VideoLibrary(QObject *parent = nullptr);
 	static VideoLibrary* instance();
 
-	VideoFile getVideo(int index) const {return m_vids.at(index);}
+	VideoFile* getVideo(int index) const {return m_vids.at(index);}
 	RowID addVideo(VideoFile vid);
 	RowID count() const {return m_vids.count();}
 
@@ -32,7 +33,7 @@ public slots:
 protected:
 	int findPath(const QString& p);
 private:
-	QList<VideoFile> m_vids;
+	QVector<VideoFile*> m_vids;
 	QMap<QString, RowID> m_pathIndex;
 };
 

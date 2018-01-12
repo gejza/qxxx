@@ -11,7 +11,7 @@ class PlaylistModel : public QAbstractTableModel
 	Q_OBJECT
 
 public:
-	enum { ColName, ColCount, };
+	enum { ColName, ColCreated, ColCount, };
 
 	explicit PlaylistModel(QObject *parent = nullptr);
 
@@ -24,7 +24,7 @@ public:
 
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
-	VideoFile at(const QModelIndex& idx) const;
+	VideoFile* at(const QModelIndex& idx) const;
 	int rowToId(int row) const;
 	int idToRow(int id) const;
 protected:

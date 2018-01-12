@@ -10,6 +10,7 @@ Timeline::Timeline(QWidget *parent) : QWidget(parent)
 	frameColor = palette().mid().color();
 	setMaximumHeight(30);
 	setMinimumHeight(10);
+	m_nav = new TimeSeekNavigator();
 }
 
 QString Timeline::toString() const
@@ -31,6 +32,9 @@ void Timeline::markRangeEnd()
 
 Pos Timeline::seekForward()
 {
+	if (m_nav) {
+		return m_nav->seekForward(m_total, m_pos);
+	}
 	switch (m_mode) {
 	case MoveValue:
 		return m_pos + m_skipValue;
@@ -43,6 +47,9 @@ Pos Timeline::seekForward()
 
 Pos Timeline::seekBackward()
 {
+	if (m_nav) {
+		return m_nav->seekBackward(m_total, m_pos);
+	}
 	switch (m_mode) {
 	case MoveValue:
 		return m_pos - m_skipValue;
@@ -122,4 +129,24 @@ Pos Range::seek(qreal rpos) const
 qreal Range::ratio(Pos pos) const
 {
 	return max > min ? qreal(pos - min) / qreal(max - min) : 0;
+}
+
+TimeSeekNavigator::TimeSeekNavigator()
+{
+
+}
+
+TimeSeekNavigator::~TimeSeekNavigator()
+{
+
+}
+
+Pos TimeSeekNavigator::seekForward(const Range &total, Pos pos)
+{
+	return pos + 15000;
+}
+
+Pos TimeSeekNavigator::seekBackward(const Range &total, Pos pos)
+{
+	return pos - 15000;
 }
