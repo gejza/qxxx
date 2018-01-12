@@ -1,0 +1,36 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/document.svg</file>
+        <file>image/media-pause.svg</file>
+        <file>image/media-play.svg</file>
+        <file>image/media-record.svg</file>
+        <file>image/media-skip-backward.svg</file>
+        <file>image/media-skip-forward.svg</file>
+        <file>image/media-step-backward.svg</file>
+        <file>image/media-step-forward.svg</file>
+        <file>image/media-stop.svg</file>
+        <file>image/random.svg</file>
+        <file>image/arrow-bottom.svg</file>
+        <file>image/arrow-circle-bottom.svg</file>
+        <file>image/arrow-circle-left.svg</file>
+        <file>image/arrow-circle-right.svg</file>
+        <file>image/arrow-circle-top.svg</file>
+        <file>image/arrow-left.svg</file>
+        <file>image/arrow-right.svg</file>
+        <file>image/arrow-thick-bottom.svg</file>
+        <file>image/arrow-thick-left.svg</file>
+        <file>image/arrow-thick-right.svg</file>
+        <file>image/arrow-thick-top.svg</file>
+        <file>image/arrow-top.svg</file>
+        <file>image/bookmark.svg</file>
+        <file>image/collapse-down.svg</file>
+        <file>image/collapse-left.svg</file>
+        <file>image/collapse-right.svg</file>
+        <file>image/collapse-up.svg</file>
+        <file>image/expand-down.svg</file>
+        <file>image/expand-left.svg</file>
+        <file>image/expand-right.svg</file>
+        <file>image/expand-up.svg</file>
+        <file>image/project.svg</file>
+    </qresource>
+</RCC>
