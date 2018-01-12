@@ -2,6 +2,8 @@
 #include "osdfilter.h"
 #include "playlistmodel.h"
 #include "ui_mainwindow.h"
+#include "videolibrary.h"
+#include "statisticsview.h"
 
 #include <QFileDialog>
 #include <QJsonDocument>
@@ -64,17 +66,28 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->actionSearchFiles, &QAction::triggered, this, &MainWindow::onFindFiles);
 	connect(ui->playTable, &QTableView::activated, this, [this](const QModelIndex& idx){
-		m_player->play(m_playlist->at(idx).filePath());
+		play(m_playlist->rowToId(idx.row()));
 	});
 	QTimer::singleShot(0, this, &MainWindow::loadPlaylist);
 	connect(this, &QObject::destroyed, this, &MainWindow::savePlaylist);
 
 	connect(ui->actionRandomPlay, &QAction::triggered, this, &MainWindow::onRandomPlay);
+	connect(ui->actionShowInfo, &QAction::triggered, this, &MainWindow::showInfo);
+
+	qsrand(QTime::currentTime().msecsSinceStartOfDay());
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
+}
+
+void MainWindow::play(int idx)
+{
+	VideoFile v = VideoLibrary::instance()->getVideo(idx);
+	m_player->play(v.filePath());
+	ui->playTable->setCurrentIndex(m_playlist->index(m_playlist->idToRow(v.rowId()), 0));
+	ui->statusBar->showMessage(v.filePath());
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -108,9 +121,7 @@ void MainWindow::playPause()
 
 void MainWindow::onRandomPlay()
 {
-	int pi = qrand()%m_playlist->rowCount();
-	m_player->play(m_playlist->at(pi).filePath());
-	ui->playTable->setCurrentIndex(m_playlist->index(pi, 0));
+	play(qrand()%m_playlist->rowCount());
 }
 
 void MainWindow::onBack()
@@ -126,27 +137,25 @@ void MainWindow::onForward()
 void MainWindow::onFindFiles()
 {
 	QString file = QFileDialog::getExistingDirectory(this, tr("Open dir"), "/ext3/xxx");
-	m_playlist->find(file);
+	VideoLibrary::instance()->find(file);
 }
 
 void MainWindow::savePlaylist()
 {
-	QSaveFile f("playlist.json");
-	QJsonDocument doc(m_playlist->toJson());
-	if (f.open(QIODevice::WriteOnly)) {
-		f.write(doc.toJson());
-		f.commit();
-	}
+	VideoLibrary::instance()->savePlaylist();
 }
 
 void MainWindow::loadPlaylist()
 {
-	QFile f("playlist.json");
-	if (f.open(QIODevice::ReadOnly)) {
-		auto doc = QJsonDocument::fromJson(f.readAll());
-		m_playlist->fromJson(doc.array());
-	}
+	VideoLibrary::instance()->loadPlaylist();
 }
 
-
+void MainWindow::showInfo()
+{
+	if (!m_stats)
+		m_stats = new StatisticsView(this);
+	if (m_player)
+		m_stats->setStatistics(m_player->statistics());
+	m_stats->show();
+}
 

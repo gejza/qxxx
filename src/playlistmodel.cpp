@@ -1,4 +1,5 @@
 #include "playlistmodel.h"
+#include "videolibrary.h"
 
 #include <QDir>
 #include <QJsonArray>
@@ -7,11 +8,16 @@
 PlaylistModel::PlaylistModel(QObject *parent)
 	: QAbstractTableModel(parent)
 {
+	connect(VideoLibrary::instance(), &VideoLibrary::filesAdded, [this](int first, int last){
+		//this->beginInsertRows(QModelIndex(), first, last);
+		//endInsertRows();
+		checkIndex();
+	});
 }
 
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	if (orientation != Qt::Horizontal) {
+	if (orientation != Qt::Horizontal || role != Qt::DisplayRole) {
 		return  QVariant();
 	}
 	switch (section) {
@@ -28,7 +34,8 @@ int PlaylistModel::rowCount(const QModelIndex &parent) const
 	if (parent.isValid())
 		return 0;
 
-	return m_vids.count();
+	const_cast<PlaylistModel*>(this)->checkIndex();
+	return m_p.count();
 }
 
 int PlaylistModel::columnCount(const QModelIndex &parent) const
@@ -37,53 +44,39 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const
 	return ColCount;
 }
 
-void PlaylistModel::findRecursion(const QString &path, const QString &pattern)
-{
-	QDir currentDir(path);
-	const QString prefix = path + QLatin1Char('/');
-	foreach (const QString &match, currentDir.entryList(QStringList(pattern), QDir::Files | QDir::NoSymLinks)) {
-		VideoFile v;
-		v.setPath(prefix + match);
-		m_vids << v;
-	}
-	foreach (const QString &dir, currentDir.entryList(QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot))
-		findRecursion(prefix + dir, pattern);
-}
-
-void PlaylistModel::find(const QString &path)
-{
-	//rowsAboutToBeInserted();
-	beginResetModel();
-	findRecursion(path, "*.*");
-	endResetModel();
-}
-
 VideoFile PlaylistModel::at(const QModelIndex &idx) const
 {
-	return at(idx.row());
+	return VideoLibrary::instance()->getVideo(rowToId(idx.row()));
 }
 
-VideoFile PlaylistModel::at(int idx) const
+int PlaylistModel::rowToId(int row) const
 {
-	return m_vids.at(idx);
+	return m_p.at(row);
 }
 
-QJsonArray PlaylistModel::toJson() const
+int PlaylistModel::idToRow(int id) const
 {
-	QJsonArray arr;
-	for (int i=0;i < m_vids.count();i++) {
-		arr.append(m_vids.at(i).toJson());
+	for (int i=0;i < m_p.count(); i++) {
+		if (m_p.at(i) == id) {
+			return i;
+		}
 	}
-	return arr;
+	return -1;
 }
 
-void PlaylistModel::fromJson(const QJsonArray &arr)
+void PlaylistModel::checkIndex()
 {
-	beginResetModel();
-	for (auto it=arr.constBegin(); it != arr.constEnd(); ++it) {
-		m_vids << VideoFile::fromJson(it->toObject());
+	if (m_p.count() < VideoLibrary::instance()->count()) {
+		beginResetModel();
+		while (m_p.count() < VideoLibrary::instance()->count()) {
+			m_p << m_p.count();
+		}
+
+		std::sort(m_p.begin(), m_p.end(), [](int a, int b){
+			return VideoLibrary::instance()->getVideo(a).fileName() < VideoLibrary::instance()->getVideo(b).fileName();
+		});
+		endResetModel();
 	}
-	endResetModel();
 }
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const

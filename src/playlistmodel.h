@@ -24,16 +24,13 @@ public:
 
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
-	void findRecursion(const QString &path, const QString &pattern);
-	void find(const QString& path);
-
 	VideoFile at(const QModelIndex& idx) const;
-	VideoFile at(int idx) const;
-
-	QJsonArray toJson() const;
-	void fromJson(const QJsonArray& arr);
+	int rowToId(int row) const;
+	int idToRow(int id) const;
+protected:
+	void checkIndex();
 private:
-	QList<VideoFile> m_vids;
+	mutable QVector<int> m_p;
 };
 
 #endif // PLAYLISTMODEL_H

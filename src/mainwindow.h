@@ -16,6 +16,7 @@ class QLabel;
 class OSDFilter;
 
 class PlaylistModel;
+class StatisticsView;
 
 class MainWindow : public QMainWindow
 {
@@ -26,6 +27,8 @@ public:
 	~MainWindow();
 
 public Q_SLOTS:
+	void play(int idx);
+	void showInfo();
 	void openMedia();
 	void playPause();
 	void onRandomPlay();
@@ -44,6 +47,7 @@ private:
 	QLabel* m_position;
 	PlaylistModel* m_playlist = nullptr;
 	OSDFilter *m_osd = nullptr;
+	StatisticsView* m_stats = nullptr;
 };
 
 #endif // MAINWINDOW_H

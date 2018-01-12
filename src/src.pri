@@ -7,7 +7,9 @@ HEADERS += \
     $$PWD/videofile.h \
     $$PWD/playlistmodel.h \
     $$PWD/preferences.h \
-    $$PWD/osdfilter.h
+    $$PWD/osdfilter.h \
+    $$PWD/videolibrary.h \
+    $$PWD/statisticsview.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -16,4 +18,6 @@ SOURCES += \
     $$PWD/videofile.cpp \
     $$PWD/playlistmodel.cpp \
     $$PWD/preferences.cpp \
-    $$PWD/osdfilter.cpp
+    $$PWD/osdfilter.cpp \
+    $$PWD/videolibrary.cpp \
+    $$PWD/statisticsview.cpp

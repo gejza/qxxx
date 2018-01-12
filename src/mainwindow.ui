@@ -63,6 +63,7 @@
    <addaction name="actionSearchFiles"/>
    <addaction name="actionRandomPlay"/>
    <addaction name="actionShowNextOSD"/>
+   <addaction name="actionShowInfo"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockWidget">
@@ -198,6 +199,11 @@
   <action name="actionShowNextOSD">
    <property name="text">
     <string>Show Next OSD</string>
+   </property>
+  </action>
+  <action name="actionShowInfo">
+   <property name="text">
+    <string>Show Info</string>
    </property>
   </action>
  </widget>

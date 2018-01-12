@@ -12,6 +12,8 @@ public:
 	explicit Preferences(QObject *parent = nullptr);
 
 	static Preferences* instance();
+
+	QString dbPath() const;
 	/**
 	 * Provides access to the QSettings instance to allow storing/retrieving
 	 * arbitrary values. The naming style for groups and keys is CamelCase.

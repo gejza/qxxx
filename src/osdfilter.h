@@ -34,7 +34,7 @@ protected:
 class OSDFilter : public QtAV::VideoFilter, public OSD
 {
 public:
-	OSDFilter(QObject *parent = 0);
+	explicit OSDFilter(QObject *parent = 0);
 	bool isSupported(QtAV::VideoFilterContext::Type ct) const {
 		return ct == QtAV::VideoFilterContext::QtPainter || ct == QtAV::VideoFilterContext::X11;
 	}
