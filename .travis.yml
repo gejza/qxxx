@@ -1,0 +1,12 @@
+ty beta Build Environment
+sudo: required
+dist: trusty
+
+install:
+  - sudo apt-add-repository --yes ppa:beineri/opt-qt551-trusty
+  - sudo apt-get update
+  - sudo apt-get install -y qt5-default qttools5-dev-tools qtav-sdk #install necessary Qt files
+
+script:
+  - qmake "CONFIG+=debug" qxxx.pro #we gonna compile for Unit test first
+  - make
