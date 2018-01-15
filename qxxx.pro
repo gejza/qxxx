@@ -22,6 +22,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(src/src.pri)
 
+unix {
+    target.path = /usr/bin
+    INSTALLS += target
+}
+
 RESOURCES += \
     qxxx.qrc
 
