@@ -45,6 +45,15 @@
      <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuPlaylist">
+    <property name="title">
+     <string>Playlist</string>
+    </property>
+    <addaction name="actionSave"/>
+    <addaction name="actionSearchFiles"/>
+    <addaction name="actionComputeHashes"/>
+   </widget>
+   <addaction name="menuPlaylist"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -56,8 +65,11 @@
    <addaction name="actionOpen"/>
    <addaction name="actionPlay"/>
    <addaction name="actionStop"/>
+   <addaction name="actionFaster"/>
    <addaction name="actionBack"/>
    <addaction name="actionForward"/>
+   <addaction name="actionSlower"/>
+   <addaction name="actionNext"/>
    <addaction name="actionSetStart"/>
    <addaction name="actionSetStop"/>
    <addaction name="actionSearchFiles"/>
@@ -88,6 +100,9 @@
        </property>
        <property name="selectionBehavior">
         <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
        </property>
        <attribute name="horizontalHeaderCascadingSectionResizes">
         <bool>true</bool>
@@ -204,6 +219,67 @@
   <action name="actionShowInfo">
    <property name="text">
     <string>Show Info</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionComputeHashes">
+   <property name="text">
+    <string>Compute Hashes</string>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="icon">
+    <iconset resource="../qxxx.qrc">
+     <normaloff>:/image/media-step-forward.svg</normaloff>:/image/media-step-forward.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Next</string>
+   </property>
+   <property name="shortcut">
+    <string>PgUp</string>
+   </property>
+  </action>
+  <action name="actionFaster">
+   <property name="icon">
+    <iconset resource="../qxxx.qrc">
+     <normaloff>:/image/arrow-circle-top.svg</normaloff>:/image/arrow-circle-top.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Faster</string>
+   </property>
+   <property name="shortcut">
+    <string>Up</string>
+   </property>
+  </action>
+  <action name="actionSlower">
+   <property name="icon">
+    <iconset resource="../qxxx.qrc">
+     <normaloff>:/image/arrow-circle-bottom.svg</normaloff>:/image/arrow-circle-bottom.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Slower</string>
+   </property>
+   <property name="shortcut">
+    <string>Down</string>
+   </property>
+  </action>
+  <action name="actionPrev">
+   <property name="icon">
+    <iconset resource="../qxxx.qrc">
+     <normaloff>:/image/media-step-backward.svg</normaloff>:/image/media-step-backward.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Prev</string>
+   </property>
+   <property name="shortcut">
+    <string>PgDown</string>
    </property>
   </action>
  </widget>

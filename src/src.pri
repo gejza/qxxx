@@ -9,7 +9,9 @@ HEADERS += \
     $$PWD/preferences.h \
     $$PWD/osdfilter.h \
     $$PWD/videolibrary.h \
-    $$PWD/statisticsview.h
+    $$PWD/statisticsview.h \
+    $$PWD/utils.h \
+    $$PWD/fingerprint.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -20,4 +22,6 @@ SOURCES += \
     $$PWD/preferences.cpp \
     $$PWD/osdfilter.cpp \
     $$PWD/videolibrary.cpp \
-    $$PWD/statisticsview.cpp
+    $$PWD/statisticsview.cpp \
+    $$PWD/utils.cpp \
+    $$PWD/fingerprint.cpp

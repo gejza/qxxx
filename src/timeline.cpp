@@ -10,7 +10,14 @@ Timeline::Timeline(QWidget *parent) : QWidget(parent)
 	frameColor = palette().mid().color();
 	setMaximumHeight(30);
 	setMinimumHeight(10);
-	m_nav = new TimeSeekNavigator();
+	//m_nav = new TimeSeekNavigator();
+}
+
+void Timeline::setEnd(Pos end)
+{
+	m_total.max = end;
+	updateGeometry();
+	m_skipValue = end / 20;
 }
 
 QString Timeline::toString() const
@@ -58,6 +65,18 @@ Pos Timeline::seekBackward()
 		return m_find.seek(0.7);
 	};
 	return m_pos - 1000;
+}
+
+void Timeline::setSlowly()
+{
+	m_skipValue = qMax(m_skipValue / 1.3 - 10, 1.0);
+	updateGeometry();
+}
+
+void Timeline::setFaster()
+{
+	m_skipValue = qMin(m_skipValue * 1.3 + 10, m_total.max / 4.0);
+	updateGeometry();
 }
 
 Pos Timeline::posInTime(int pos) const

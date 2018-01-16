@@ -17,6 +17,7 @@ public:
 	VideoFile* getVideo(int index) const {return m_vids.at(index);}
 	RowID addVideo(VideoFile vid);
 	RowID count() const {return m_vids.count();}
+	void addFile(const QString& path);
 
 	QJsonArray toJson() const;
 	void fromJson(const QJsonArray& arr);
@@ -26,7 +27,7 @@ public:
 
 	void findRecursion(const QString &path, const QString &pattern);
 	void find(const QString& path);
-
+	void computeHashes();
 signals:
 	void filesAdded(int b_id, int e_id);
 public slots:

@@ -1,4 +1,5 @@
 #include "playlistmodel.h"
+#include "utils.h"
 #include "videolibrary.h"
 
 #include <QDateTime>
@@ -6,13 +7,14 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-PlaylistModel::PlaylistModel(QObject *parent)
-	: QAbstractTableModel(parent)
+PlaylistModel::PlaylistModel(VideoLibrary *lib, QObject *parent)
+	: QAbstractTableModel(parent), m_lib(lib)
 {
-	connect(VideoLibrary::instance(), &VideoLibrary::filesAdded, [this](int first, int last){
-		//this->beginInsertRows(QModelIndex(), first, last);
+	connect(lib, &VideoLibrary::filesAdded, [this](int first, int last){
+		//beginInsertRows(QModelIndex(), first, last);
 		//endInsertRows();
-		checkIndex();
+		beginResetModel();
+		endResetModel();
 	});
 }
 
@@ -24,6 +26,12 @@ QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int
 	switch (section) {
 	case ColName:
 		return tr("Name");
+	case ColCreated:
+		return tr("Created");
+	case ColSize:
+		return tr("Size");
+	//case ColFinger:
+	//	return tr("Finger");
 	};
 	return QVariant();
 }
@@ -35,8 +43,7 @@ int PlaylistModel::rowCount(const QModelIndex &parent) const
 	if (parent.isValid())
 		return 0;
 
-	const_cast<PlaylistModel*>(this)->checkIndex();
-	return m_p.count();
+	return m_lib.isNull() ? 0 : m_lib->count();
 }
 
 int PlaylistModel::columnCount(const QModelIndex &parent) const
@@ -47,37 +54,8 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const
 
 VideoFile* PlaylistModel::at(const QModelIndex &idx) const
 {
-	return VideoLibrary::instance()->getVideo(rowToId(idx.row()));
-}
-
-int PlaylistModel::rowToId(int row) const
-{
-	return m_p.at(row);
-}
-
-int PlaylistModel::idToRow(int id) const
-{
-	for (int i=0;i < m_p.count(); i++) {
-		if (m_p.at(i) == id) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-void PlaylistModel::checkIndex()
-{
-	if (m_p.count() < VideoLibrary::instance()->count()) {
-		beginResetModel();
-		while (m_p.count() < VideoLibrary::instance()->count()) {
-			m_p << m_p.count();
-		}
-
-		std::sort(m_p.begin(), m_p.end(), [](int a, int b){
-			return VideoLibrary::instance()->getVideo(a)->fileName() < VideoLibrary::instance()->getVideo(b)->fileName();
-		});
-		endResetModel();
-	}
+	Q_ASSERT(!m_lib.isNull());
+	return m_lib->getVideo(idx.row());
 }
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
@@ -92,6 +70,10 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 			return at(index)->fileName();
 		case ColCreated:
 			return at(index)->createdTime().toString();
+		case ColSize:
+			return Utils::fileSizeToString(at(index)->fileSize());
+		//case ColFinger:
+		//	return at(index)->fingerprint().toString();
 		};
 		break;
 	case Qt::DisplayRole:

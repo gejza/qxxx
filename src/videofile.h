@@ -1,6 +1,8 @@
 #ifndef VIDEOFILE_H
 #define VIDEOFILE_H
 
+#include "fingerprint.h"
+
 #include <QExplicitlySharedDataPointer>
 
 class QJsonObject;
@@ -24,10 +26,15 @@ public:
 	void addStar() {m_stars++;}
 
 	QDateTime createdTime() const;
+	qint64 fileSize() const;
 
 	QString fileName() const;
 	QJsonObject toJson() const;
 	static VideoFile* fromJson(const QJsonObject& obj, int rowId);
+
+	void computeHash();
+
+	Fingerprint fingerprint();
 protected:
 	QFileInfo fi() const;
 private:
@@ -36,6 +43,8 @@ private:
 	int m_rowId = -1;
 	int m_stars = 0;
 	QString m_path;
+	QByteArray m_hash;
+	Fingerprint m_fing;
 };
 
 #endif // VIDEOFILE_H

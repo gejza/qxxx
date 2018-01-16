@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui av avwidgets widgets
+QT       += core gui av avwidgets widgets concurrent
 
 TARGET = qxxx
 TEMPLATE = app

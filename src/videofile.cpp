@@ -1,3 +1,4 @@
+#include "utils.h"
 #include "videofile.h"
 
 #include <QFileInfo>
@@ -40,6 +41,11 @@ QDateTime VideoFile::createdTime() const
 	return fi().lastModified();
 }
 
+qint64 VideoFile::fileSize() const
+{
+	return fi().size();
+}
+
 QString VideoFile::fileName() const
 {
 	return fi().fileName();
@@ -69,4 +75,19 @@ VideoFile* VideoFile::fromJson(const QJsonObject &obj, int rowId)
 		f->m_stars = jsv.toInt();
 	}
 	return f;
+}
+
+void VideoFile::computeHash()
+{
+	if (m_hash.isEmpty()) {
+		m_hash = Utils::genSha1(filePath());
+	}
+}
+
+Fingerprint VideoFile::fingerprint()
+{
+	if (m_fing.isNull()) {
+		m_fing = Fingerprint::fromFile(filePath());
+	}
+	return m_fing;
 }

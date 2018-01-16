@@ -12,16 +12,23 @@
 #include <QMessageBox>
 #include <QSaveFile>
 #include <QTimer>
-
-
+#include <QSortFilterProxyModel>
+#include <qfiledialog.h>
+#include <qfiledialog.h>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	m_playlist = new PlaylistModel(this);
-	ui->playTable->setModel(m_playlist);
+	m_playlist = new PlaylistModel(VideoLibrary::instance(), this);
+	m_proxy = new QSortFilterProxyModel(this);
+	m_proxy->setSourceModel(m_playlist);
+	ui->playTable->setModel(m_proxy);
+
+	connect(VideoLibrary::instance(), &VideoLibrary::filesAdded, [this](int first, int last){
+		ui->statusBar->showMessage(QString::number(last));
+	});
 
 	setWindowTitle(QString::fromLatin1("QtAV simple player example"));
 	m_player = new QtAV::AVPlayer(this);
@@ -58,6 +65,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	});
 	connect(ui->actionBack, &QAction::triggered, this, &MainWindow::onBack);
 	connect(ui->actionForward, &QAction::triggered, this, &MainWindow::onForward);
+	connect(ui->actionFaster, &QAction::triggered, ui->timeline, &Timeline::setFaster);
+	connect(ui->actionSlower, &QAction::triggered, ui->timeline, &Timeline::setSlowly);
+	connect(ui->actionNext, &QAction::triggered, this, &MainWindow::onRandomPlay);
 
 	connect(ui->timeline, &Timeline::positionReqest, m_player, QOverload<qint64>::of(&QtAV::AVPlayer::seek));
 	connect(m_player, &QtAV::AVPlayer::durationChanged, this, [this](qint64 pos){
@@ -66,15 +76,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->actionSearchFiles, &QAction::triggered, this, &MainWindow::onFindFiles);
 	connect(ui->playTable, &QTableView::activated, this, [this](const QModelIndex& idx){
-		play(m_playlist->rowToId(idx.row()));
+		play(VideoLibrary::instance()->getVideo(m_proxy->mapToSource(idx).row()));
 	});
 	QTimer::singleShot(0, this, &MainWindow::loadPlaylist);
 	connect(this, &QObject::destroyed, this, &MainWindow::savePlaylist);
 
 	connect(ui->actionRandomPlay, &QAction::triggered, this, &MainWindow::onRandomPlay);
 	connect(ui->actionShowInfo, &QAction::triggered, this, &MainWindow::showInfo);
+	connect(ui->actionSave, &QAction::triggered, VideoLibrary::instance(), &VideoLibrary::savePlaylist);
 
 	qsrand(QTime::currentTime().msecsSinceStartOfDay());
+
+	ui->menuPlaylist->addAction(ui->dockWidget->toggleViewAction());
+	connect(ui->actionComputeHashes, &QAction::triggered, VideoLibrary::instance(), &VideoLibrary::computeHashes);
 }
 
 MainWindow::~MainWindow()
@@ -82,12 +96,13 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void MainWindow::play(int idx)
+void MainWindow::play(VideoFile *vf)
 {
-	VideoFile* v = VideoLibrary::instance()->getVideo(idx);
-	m_player->play(v->filePath());
-	ui->playTable->setCurrentIndex(m_playlist->index(m_playlist->idToRow(v->rowId()), 0));
-	ui->statusBar->showMessage(v->filePath());
+	// unload prev
+	m_current = vf;
+	m_player->play(vf->filePath());
+	ui->statusBar->showMessage(vf->filePath());
+	ui->playTable->setCurrentIndex(m_proxy->mapFromSource(m_playlist->index(vf->rowId(), 0)));
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -104,10 +119,12 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::openMedia()
 {
-	QString file = "/ext3/xxx/x40/movies-2017-09-05-1-1d2334877a4c4b299025ea6bfd21321c-video.mp4"; // QFileDialog::getOpenFileName(0, tr("Open a video"));
-	if (file.isEmpty())
+	QStringList fs = QFileDialog::getOpenFileNames(this, tr("Open a video"));
+	if (fs.isEmpty())
 		return;
-	m_player->play(file);
+	for (QString fn : fs) {
+		VideoLibrary::instance()->addFile(fn);
+	}
 }
 
 void MainWindow::playPause()
@@ -121,7 +138,8 @@ void MainWindow::playPause()
 
 void MainWindow::onRandomPlay()
 {
-	play(qrand()%m_playlist->rowCount());
+	int next = qrand()%m_playlist->rowCount();
+	play(VideoLibrary::instance()->getVideo(next));
 }
 
 void MainWindow::onBack()
@@ -158,4 +176,6 @@ void MainWindow::showInfo()
 		m_stats->setStatistics(m_player->statistics());
 	m_stats->show();
 }
+
+
 

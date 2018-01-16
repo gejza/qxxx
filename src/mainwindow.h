@@ -12,11 +12,13 @@ class MainWindow;
 }
 
 class QLabel;
+class QSortFilterProxyModel;
 
 class OSDFilter;
 
 class PlaylistModel;
 class StatisticsView;
+class VideoFile;
 
 class MainWindow : public QMainWindow
 {
@@ -25,9 +27,8 @@ class MainWindow : public QMainWindow
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
-
+	void play(VideoFile* vf);
 public Q_SLOTS:
-	void play(int idx);
 	void showInfo();
 	void openMedia();
 	void playPause();
@@ -46,8 +47,10 @@ private:
 	QtAV::AVPlayer *m_player;
 	QLabel* m_position;
 	PlaylistModel* m_playlist = nullptr;
+	QSortFilterProxyModel* m_proxy = nullptr;
 	OSDFilter *m_osd = nullptr;
 	StatisticsView* m_stats = nullptr;
+	VideoFile* m_current = nullptr;
 };
 
 #endif // MAINWINDOW_H

@@ -49,7 +49,7 @@ public:
 	explicit Timeline(QWidget *parent = nullptr);
 
 	void setBegin(Pos begin) { m_total.min = begin; updateGeometry(); }
-	void setEnd(Pos end) { m_total.max = end; updateGeometry(); }
+	void setEnd(Pos end);
 	void setPos(Pos pos) { m_pos = pos; update(); }
 
 	QString toString() const;
@@ -59,6 +59,8 @@ public:
 
 	Pos seekForward();
 	Pos seekBackward();
+	void setSlowly();
+	void setFaster();
 
 	Q_SIGNAL void positionReqest(Pos pos);
 protected:

@@ -2,18 +2,20 @@
 #define PLAYLISTMODEL_H
 
 #include <QAbstractListModel>
+#include <QPointer>
 #include "videofile.h"
 
 class QJsonArray;
+class VideoLibrary;
 
 class PlaylistModel : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
-	enum { ColName, ColCreated, ColCount, };
+	enum { ColName, ColCreated, ColSize, /*ColFinger,*/ ColCount, };
 
-	explicit PlaylistModel(QObject *parent = nullptr);
+	explicit PlaylistModel(VideoLibrary* lib, QObject *parent = nullptr);
 
 	// Header:
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
@@ -25,12 +27,8 @@ public:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	VideoFile* at(const QModelIndex& idx) const;
-	int rowToId(int row) const;
-	int idToRow(int id) const;
-protected:
-	void checkIndex();
 private:
-	mutable QVector<int> m_p;
+	QPointer<VideoLibrary> m_lib;
 };
 
 #endif // PLAYLISTMODEL_H
