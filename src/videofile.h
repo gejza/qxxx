@@ -2,49 +2,52 @@
 #define VIDEOFILE_H
 
 #include "fingerprint.h"
+#include "xfile.h"
 
-#include <QExplicitlySharedDataPointer>
+#include <QtAV/FrameReader.h>
+#include <QtAV/Statistics.h>
 
 class QJsonObject;
-class QFileInfo;
-class QDateTime;
 
-class VideoFile
+
+class VideoFile : public XFile
 {
-	class Data;
+	Q_OBJECT
+
+	typedef XFile Super;
 public:
-	VideoFile();
-	VideoFile(int rowId);
-	virtual ~VideoFile();
+	enum MetaData {
+		MD_Bitrate = 100,
+	};
 
-	int rowId() const;
-
-	QString filePath() const;
-	void setPath(const QString& path);
+	VideoFile(const XHash& id, QObject *parent = nullptr);
+	~VideoFile() Q_DECL_OVERRIDE;
 
 	int stars() const {return m_stars;}
 	void addStar() {m_stars++;}
 
-	QDateTime createdTime() const;
-	qint64 fileSize() const;
-
-	QString fileName() const;
-	QJsonObject toJson() const;
-	static VideoFile* fromJson(const QJsonObject& obj, int rowId);
+	QJsonObject toJson() const Q_DECL_OVERRIDE;
+	void loadJson(const QJsonObject& json) Q_DECL_OVERRIDE;
 
 	void computeHash();
 
 	Fingerprint fingerprint();
-protected:
-	QFileInfo fi() const;
-private:
-	Q_DISABLE_COPY(VideoFile)
+	QImage thumb();
 
-	int m_rowId = -1;
+	QVariant metaData(MetaData md);
+
+	void setFromStats(const QtAV::Statistics& stats);
+protected:
+	QImage loadThumb(int pos);
+	QtAV::FrameReader* reader();
+private:
 	int m_stars = 0;
-	QString m_path;
+
 	QByteArray m_hash;
 	Fingerprint m_fing;
+	QtAV::FrameReader* m_reader = nullptr;
+	QImage m_thumb;
+	QVariantMap m_meta;
 };
 
 #endif // VIDEOFILE_H

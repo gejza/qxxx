@@ -38,6 +38,7 @@ public Q_SLOTS:
 	void onFindFiles();
 	void savePlaylist();
 	void loadPlaylist();
+	void onLoaded();
 protected:
 	void changeEvent(QEvent *e);
 
@@ -47,7 +48,6 @@ private:
 	QtAV::AVPlayer *m_player;
 	QLabel* m_position;
 	PlaylistModel* m_playlist = nullptr;
-	QSortFilterProxyModel* m_proxy = nullptr;
 	OSDFilter *m_osd = nullptr;
 	StatisticsView* m_stats = nullptr;
 	VideoFile* m_current = nullptr;

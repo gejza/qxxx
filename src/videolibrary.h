@@ -1,41 +1,46 @@
 #ifndef VIDEOLIBRARY_H
 #define VIDEOLIBRARY_H
 
-#include <QMap>
-#include <QObject>
-#include <QVector>
+#include "xfilelibrary.h"
 #include "videofile.h"
+#include <QMap>
+#include <QVector>
 
-class VideoLibrary : public QObject
+class VideoLibrary : public XFileLibrary
 {
 	Q_OBJECT
+
+	typedef XFileLibrary Super;
 public:
-	typedef int RowID;
 	explicit VideoLibrary(QObject *parent = nullptr);
 	static VideoLibrary* instance();
 
-	VideoFile* getVideo(int index) const {return m_vids.at(index);}
-	RowID addVideo(VideoFile vid);
-	RowID count() const {return m_vids.count();}
-	void addFile(const QString& path);
+	//RowID addVideo(VideoFile vid);
+	int count() const {return m_vids.count();}
+
+	VideoFile* getVideo(const QString& path);
+	VideoFile* getVideo(const XHash& id);
+	QList<VideoFile*> all() const;
 
 	QJsonArray toJson() const;
 	void fromJson(const QJsonArray& arr);
 
 	void savePlaylist();
+	void saveData();
 	void loadPlaylist();
 
 	void findRecursion(const QString &path, const QString &pattern);
 	void find(const QString& path);
 	void computeHashes();
 signals:
-	void filesAdded(int b_id, int e_id);
+	void fileAdded(VideoFile* file);
 public slots:
 protected:
-	int findPath(const QString& p);
+
+	//int findPath(const QString& p);
 private:
-	QVector<VideoFile*> m_vids;
-	QMap<QString, RowID> m_pathIndex;
+	QHash<XHash, VideoFile*> m_vids;
+	//QMap<QString, XFile::ID> m_pathIndex;
 };
 
 #endif // VIDEOLIBRARY_H

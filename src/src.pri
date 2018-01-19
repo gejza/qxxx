@@ -11,7 +11,12 @@ HEADERS += \
     $$PWD/videolibrary.h \
     $$PWD/statisticsview.h \
     $$PWD/utils.h \
-    $$PWD/fingerprint.h
+    $$PWD/fingerprint.h \
+    $$PWD/xfile.h \
+    $$PWD/db.h \
+    $$PWD/xxhash.h \
+    $$PWD/xhash.h \
+    $$PWD/xfilelibrary.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -24,4 +29,9 @@ SOURCES += \
     $$PWD/videolibrary.cpp \
     $$PWD/statisticsview.cpp \
     $$PWD/utils.cpp \
-    $$PWD/fingerprint.cpp
+    $$PWD/fingerprint.cpp \
+    $$PWD/xfile.cpp \
+    $$PWD/db.cpp \
+    $$PWD/xhash.cpp \
+    $$PWD/xxhash.cpp \
+    $$PWD/xfilelibrary.cpp

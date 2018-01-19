@@ -4,16 +4,16 @@
 #include <QFileInfo>
 #include <QJsonObject>
 #include <QDateTime>
+#include <QDebug>
+#include <QThreadPool>
+#define UNICODE
+#include <MediaInfo/MediaInfo.h>
 
 
-VideoFile::VideoFile()
+VideoFile::VideoFile(const XHash& id, QObject *parent)
+	: Super(id, parent)
 {
 
-}
-
-VideoFile::VideoFile(int rowId)
-{
-	m_rowId = rowId;
 }
 
 VideoFile::~VideoFile()
@@ -21,60 +21,25 @@ VideoFile::~VideoFile()
 
 }
 
-int VideoFile::rowId() const
-{
-	return m_rowId;
-}
-
-QString VideoFile::filePath() const
-{
-	return m_path;
-}
-
-void VideoFile::setPath(const QString &path)
-{
-	m_path = path;
-}
-
-QDateTime VideoFile::createdTime() const
-{
-	return fi().lastModified();
-}
-
-qint64 VideoFile::fileSize() const
-{
-	return fi().size();
-}
-
-QString VideoFile::fileName() const
-{
-	return fi().fileName();
-}
-
 QJsonObject VideoFile::toJson() const
 {
-	QJsonObject ret;
-	ret["path"] = filePath();
+	QJsonObject ret = Super::toJson();
 	if (stars()) {
 		ret["stars"] = stars();
+	}
+	if (!m_meta.isEmpty()) {
+		ret["meta"] = QJsonObject::fromVariantMap(m_meta);
 	}
 	return ret;
 }
 
-QFileInfo VideoFile::fi() const
+void VideoFile::loadJson(const QJsonObject &json)
 {
-	return QFileInfo(filePath());
-}
-
-VideoFile* VideoFile::fromJson(const QJsonObject &obj, int rowId)
-{
-	VideoFile *f = new VideoFile(rowId);
-	f->setPath(obj.value("path").toString());
-	QJsonValue jsv = obj.value("stars");
+	Super::loadJson(json);
+	QJsonValue jsv = json.value("stars");
 	if (!jsv.isUndefined()) {
-		f->m_stars = jsv.toInt();
+		m_stars = jsv.toInt();
 	}
-	return f;
 }
 
 void VideoFile::computeHash()
@@ -90,4 +55,55 @@ Fingerprint VideoFile::fingerprint()
 		m_fing = Fingerprint::fromFile(filePath());
 	}
 	return m_fing;
+}
+
+QImage VideoFile::thumb()
+{
+	if (m_thumb.isNull()) {
+		//m_thumb = loadThumb(3000);
+	}
+	return m_thumb;
+}
+
+QVariant VideoFile::metaData(VideoFile::MetaData md)
+{
+	if (md == MD_Bitrate) {
+		MediaInfoLib::MediaInfo mi;
+		mi.Open(filePath().toStdWString());
+		return QString::fromStdWString(mi.Get(MediaInfoLib::Stream_Video, 0,  L"BitRate"));
+	}
+	return QVariant();
+}
+
+void VideoFile::setFromStats(const QtAV::Statistics &stats)
+{
+	m_meta["duration"] = stats.duration;
+	m_meta["format"] = stats.format;
+	//for (auto it=stats.metadata.begin(); it != stats.metadata.end(); ++it) {
+	//	m_meta[it.key()] = it.value();
+	//}
+}
+
+QImage VideoFile::loadThumb(int pos)
+{
+	QtAV::FrameReader* r = reader();
+	while (r->readMore()) {
+		while (r->hasEnoughVideoFrames()) {
+			const QtAV::VideoFrame f = r->getVideoFrame();
+			qInfo() << "Found screen at" << f.timestamp();
+			m_reader->deleteLater();
+			m_reader = nullptr;
+			return f.toImage();
+		}
+	}
+	return QImage();
+}
+
+QtAV::FrameReader *VideoFile::reader()
+{
+	if (!m_reader) {
+		m_reader = new QtAV::FrameReader();
+		m_reader->setMedia(filePath());
+	}
+	return m_reader;
 }

@@ -1,9 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <QtCore/qglobal.h>
-
-
+#include <qglobal.h>
 
 class Utils
 {

@@ -39,3 +39,8 @@ CMakeLists.txt.user*
 
 debian/.debhelper/
 debian/files
+debian/qxxx.debhelper.log
+debian/qxxx.substvars
+debian/qxxx/
+index.db
+

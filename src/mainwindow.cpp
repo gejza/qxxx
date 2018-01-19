@@ -4,6 +4,7 @@
 #include "ui_mainwindow.h"
 #include "videolibrary.h"
 #include "statisticsview.h"
+#include "db.h"
 
 #include <QFileDialog>
 #include <QJsonDocument>
@@ -22,19 +23,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	m_playlist = new PlaylistModel(VideoLibrary::instance(), this);
-	m_proxy = new QSortFilterProxyModel(this);
-	m_proxy->setSourceModel(m_playlist);
-	ui->playTable->setModel(m_proxy);
-
-	connect(VideoLibrary::instance(), &VideoLibrary::filesAdded, [this](int first, int last){
-		ui->statusBar->showMessage(QString::number(last));
-	});
+	ui->playTable->setModel(m_playlist);
 
 	setWindowTitle(QString::fromLatin1("QtAV simple player example"));
 	m_player = new QtAV::AVPlayer(this);
+	connect(m_player, &AVPlayer::loaded, this, &MainWindow::onLoaded);
 	m_osd = new OSDFilter(this);
 
-	m_vo = new QtAV::VideoOutput(this);
+	m_vo = new QtAV::VideoOutput(ui->verticalLayout);
 	if (!m_vo->widget()) {
 		QMessageBox::warning(0, QString::fromLatin1("QtAV error"), tr("Can not create video renderer"));
 		return;
@@ -76,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->actionSearchFiles, &QAction::triggered, this, &MainWindow::onFindFiles);
 	connect(ui->playTable, &QTableView::activated, this, [this](const QModelIndex& idx){
-		play(VideoLibrary::instance()->getVideo(m_proxy->mapToSource(idx).row()));
+		play(m_playlist->at(idx));
 	});
 	QTimer::singleShot(0, this, &MainWindow::loadPlaylist);
 	connect(this, &QObject::destroyed, this, &MainWindow::savePlaylist);
@@ -93,6 +89,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+	VideoLibrary::instance()->saveData();
+	//XDb::instance()->close();
 	delete ui;
 }
 
@@ -102,7 +100,7 @@ void MainWindow::play(VideoFile *vf)
 	m_current = vf;
 	m_player->play(vf->filePath());
 	ui->statusBar->showMessage(vf->filePath());
-	ui->playTable->setCurrentIndex(m_proxy->mapFromSource(m_playlist->index(vf->rowId(), 0)));
+	ui->playTable->setCurrentIndex(m_playlist->find(vf));
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -123,7 +121,7 @@ void MainWindow::openMedia()
 	if (fs.isEmpty())
 		return;
 	for (QString fn : fs) {
-		VideoLibrary::instance()->addFile(fn);
+		VideoLibrary::instance()->getVideo(fn);
 	}
 }
 
@@ -138,8 +136,11 @@ void MainWindow::playPause()
 
 void MainWindow::onRandomPlay()
 {
+	if (m_playlist->rowCount() == 0) {
+		return;
+	}
 	int next = qrand()%m_playlist->rowCount();
-	play(VideoLibrary::instance()->getVideo(next));
+	play(m_playlist->at(next));
 }
 
 void MainWindow::onBack()
@@ -166,6 +167,13 @@ void MainWindow::savePlaylist()
 void MainWindow::loadPlaylist()
 {
 	VideoLibrary::instance()->loadPlaylist();
+}
+
+void MainWindow::onLoaded()
+{
+	if (m_current) {
+		m_current->setFromStats(m_player->statistics());
+	}
 }
 
 void MainWindow::showInfo()
